@@ -44,6 +44,11 @@ galaxy_info:
   #   - 7
   #   - 99.99
 
+  platforms:
+    - name: Ubuntu
+      versions:
+         - all
+
   galaxy_tags:
     - s3
     - backup
