@@ -1,4 +1,4 @@
-Role Name
+backups3
 =========
 
  Ansible role to backup folders to tar.gz and copy them to amazon s3 bucket.
