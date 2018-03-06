@@ -1,5 +1,5 @@
 galaxy_info:
-  author: Daniela Torres Faria
+  author: Daniela Torres
   description: Ansible role to backup folders to tar.gz and copy them to amazon s3 bucket
   company:
 
