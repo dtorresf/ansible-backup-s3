@@ -1,7 +1,6 @@
 galaxy_info:
-  author: Daniela Torres
-  description: Ansible role to backup folders to tar.gz and copy them to amazon s3 bucket
-  company:
+  author: "Daniela Torres"
+  description: "Ansible role to backup folders to tar.gz and copy them to amazon s3 bucket"
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
