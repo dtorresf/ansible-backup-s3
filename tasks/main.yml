@@ -7,7 +7,7 @@
     - boto3
     - botocore
 
-- name: Verify if {{ local_backup_dir }} is created
+- name: Verify if backup dir is created
   file: path={{ local_backup_dir }} state=directory
 
 - name: Create tar file for Paths
@@ -26,7 +26,7 @@
     mode: put
   with_dict: "{{ paths_to_backup }}"
 
-- name: Find older backups in {{ local_backup_dir }}
+- name: Find older backups
   find:
     paths: "{{ local_backup_dir }}"
     patterns: '*-backup-*.tar.gz'
@@ -34,7 +34,7 @@
     age_stamp: mtime
   register: old_backups
 
-- name: Delete older backups in {{ local_backup_dir }}
+- name: Delete older backups
   file:
     path: "{{ item.path }}"
     state: absent
