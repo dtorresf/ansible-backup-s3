@@ -1,7 +1,7 @@
 ---
 # defaults file for backups3
 local_backup_dir: /backups3
-environment: test
+env: test
 bucket_name: mybucket
 paths_to_backup:
   path1:

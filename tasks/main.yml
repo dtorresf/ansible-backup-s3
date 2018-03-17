@@ -13,7 +13,7 @@
 - name: Create tar file for Paths
   archive:
     path: "{{ item.value.path }}"
-    dest: {{ local_backup_dir }}/{{ item.value.tag }}-backup-{{ environment }}-{{ ansible_hostname }}-{{ ansible_date_time.date }}.tar.gz
+    dest: /{{ local_backup_dir }}/{{ item.value.tag }}-backup-{{ env }}-{{ ansible_hostname }}-{{ ansible_date_time.date }}.tar.gz
   with_dict: "{{ paths_to_backup }}"
 
 - name: Copy tar file to s3 bucket
@@ -21,8 +21,8 @@
     aws_access_key: "{{ aws_access_key }}"
     aws_secret_key: "{{ aws_secret_key }}"
     bucket: "{{ bucket_name }}"
-    object: /backups/{{ environment }}/{{ item.value.tag }}-{{ environment }}-backups/{{ item.value.tag }}-backup-{{ environment}}-{{ ansible_hostname }}-{{ ansible_date_time.date }}.tar.gz
-    src: {{ local_backup_dir }}/{{ item.value.tag }}-backup-{{ environment }}-{{ ansible_hostname }}-{{ ansible_date_time.date }}.tar.gz
+    object: /backups/{{ env }}/{{ item.value.tag }}-{{ env }}-backups/{{ item.value.tag }}-backup-{{ env}}-{{ ansible_hostname }}-{{ ansible_date_time.date }}.tar.gz
+    src: /{{ local_backup_dir }}/{{ item.value.tag }}-backup-{{ env }}-{{ ansible_hostname }}-{{ ansible_date_time.date }}.tar.gz
     mode: put
   with_dict: "{{ paths_to_backup }}"
 
