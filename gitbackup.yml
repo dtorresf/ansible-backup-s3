@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+  - name: Uploading the files to s3
+    shell: |
+      git config --global credential.helper cache
+      git clone https://github.com/gody48/ansible-backup-s3.git && cd ansible-backup-s3
+      git log --pretty=format: --name-only --since="2 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'
+      for file in `git log --pretty=format: --name-only --since="2 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`
+      do
+         aws s3 cp $file s3://kmss3check/$file
+      done
+      rm -rf /tmp/ansible-backup-s3
+    args:
+      chdir: /tmp/
+    register: filelist
