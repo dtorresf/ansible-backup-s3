@@ -6,7 +6,7 @@ backups3
 Requirements
 ------------
 
-You just need your ansible installation nothing more.
+You just need your ansible installation.
 
 Role Variables
 --------------
