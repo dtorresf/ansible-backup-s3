@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
+- hosts: all
   become: yes
   vars:
     bucket: kmss3check
@@ -19,6 +19,7 @@
 #    register: filelist
 
   - name: Uploading the files to s3
+    delegate_to: localhost
     shell: |
       git config --global credential.helper cache
       git clone https://github.com/gody48/ansible-backup-s3.git && cd ansible-backup-s3
