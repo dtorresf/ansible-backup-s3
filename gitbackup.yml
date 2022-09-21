@@ -18,7 +18,7 @@
 #      chdir: /tmp/
 #    register: filelist
 
-  - name: Uploading the latest files from the past 2 days to s3
+  - name: Uploading the latest updated files from the past 2 days to s3 bucket
     delegate_to: localhost
     shell: |
       git config --global credential.helper cache
