@@ -1,0 +1,25 @@
+---
+- hosts: localhost
+  become: yes
+  vars_files:
+   - vault.yml
+  vars:
+    s3bucket_name: kmss3check
+    git_clone: "https://{{token}}@github.com/gody48/s3restore.git"
+    git_branch: 'master'
+    git_msg: 'Restoring backup files'
+    git_email: infantusgody@gmail.com
+  tasks:
+  - name: Gathering repo name
+    set_fact:
+      git_repo_name: "{{ git_clone | regex_search('[^//]+$') | regex_replace('.git', '') }}"
+
+  - name: Restoring the files from s3 to {{ git_repo_name }} repository
+    shell: |
+       git clone '{{git_clone}}' && cd "{{ git_repo_name }}"
+       aws s3 cp s3://{{s3bucket_name}}/ . --recursive
+       git add -A
+       git status -sb
+       git config user.email "{{git_email}}"
+       git commit -m "{{git_msg}}"
+       git push origin
