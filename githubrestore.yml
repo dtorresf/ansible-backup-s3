@@ -7,7 +7,7 @@
     s3bucket_name: kmss3check
     git_clone: "https://{{token}}@github.com/gody48/s3restore.git"
     git_branch: 'master'
-    git_msg: 'Restoring backup files'
+    git_msg: 'Restoring backup files from'
     git_email: infantusgody@gmail.com
   tasks:
   - name: Gathering repo name
@@ -21,5 +21,5 @@
        git add -A
        git status -sb
        git config user.email "{{git_email}}"
-       git commit -m "{{git_msg}}"
+       git commit -m "{{git_msg}} {{ kmss3check }} bucket"
        git push origin
