@@ -21,5 +21,5 @@
        git add -A
        git status -sb
        git config user.email "{{git_email}}"
-       git commit -m "{{git_msg}} {{ kmss3check }} bucket"
+       git commit -m "{{git_msg}} {{ s3bucket_name }} bucket"
        git push origin
