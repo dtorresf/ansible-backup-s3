@@ -18,7 +18,7 @@
 #      chdir: /tmp/
 #    register: filelist
 
-  - name: Uploading the files to s3
+  - name: Uploading the latest files from the past 2 days to s3
     delegate_to: localhost
     shell: |
       git config --global credential.helper cache
@@ -28,3 +28,4 @@
       do
          aws s3 cp $file s3://{{bucket}}/$file
       done
+      
