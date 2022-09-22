@@ -3,28 +3,24 @@
   become: yes
   vars:
     bucket: kmss3check
-    git_repo_url: "https://github.com/gody48/serverless-automated-ui-testing.git,https://github.com/gody48/AWS-Trusted-Advisor-Tools.git"
     latestfiles: false
     gitrepo: true
+    token: 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
   tasks:
-#  - name: Uploading the files to s3
-#    shell: |
-#      git config --global credential.helper cache
-#      git clone https://github.com/gody48/ansible-backup-s3.git && cd ansible-backup-s3
-#      git log --pretty=format: --name-only --since="2 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'
-#      for file in `git log --pretty=format: --name-only --since="2 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`
-#      do
-#         aws s3 cp $file s3://kmss3check/$file
-#      done
-#      rm -rf /tmp/ansible-backup-s3
-#    args:
-#      chdir: /tmp/
-#    register: filelist
 
-  - name: Filtering out repo name
-    set_fact:
-      git_repo_name: "{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}"
-    loop: "{{ git_repo_url.split(',') }}"
+  - name: Gathering all the repositories
+    shell: |
+      curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer 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" https://api.github.com/orgs/safestart/repos
+    register: git_repo_url
+
+  - name: Listing out the repositories
+    debug: msg="{{ (git_repo_url.stdout | from_json) | map(attribute='clone_url') | join(',')  }}"
+    register: git_repo_list
+    
+#  - name: Filtering out repo name
+#    set_fact:
+#      git_repo_name: "{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}"
+#    loop: "{{ git_repo_url.split(',') }}"
     
   - name: Uploading all files from github repo to {{bucket}} s3 bucket
     shell: |
@@ -32,7 +28,7 @@
       git clone {{item}} 
       aws s3 cp {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} s3://{{bucket}}/{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} --exclude ".git/*" --recursive
       rm -rf {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}      
-    loop: "{{ git_repo_url.split(',') }}" 
+    loop: "{{ git_repo_list.msg.split(',') }}" 
     args:
       chdir: /tmp
     when: gitrepo
