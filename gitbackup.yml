@@ -23,7 +23,7 @@
 
   - name: Gathering repo name
     set_fact:
-      git_repo_name: "{{ git_clone | regex_search('[^//]+$') | regex_replace('.git', '') }}"
+      git_repo_name: "{{ git_repo_url | regex_search('[^//]+$') | regex_replace('.git', '') }}"
 
   - name: Uploading all files from {{git_repo_name}} repo to {{bucket}} s3 bucket.
     shell: |
