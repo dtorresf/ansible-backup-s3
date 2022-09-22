@@ -5,20 +5,26 @@
    - vault.yml
   vars:
     s3bucket_name: kmss3check
-    git_clone: "https://{{token}}@github.com/gody48/PageObjectModel.git"
+#    git_clone: "https://{{token}}@github.com/gody48/PageObjectModel.git"
     git_branch: 'master'
     git_msg: 'Restoring backup files from'
     git_email: 'infantusgody@gmail.com'
+    git_repo_name: 'PageObjectModel'
   tasks:
-  - name: Gathering repo name
-    set_fact:
-      git_repo_name: "{{ git_clone | regex_search('[^//]+$') | regex_replace('.git', '') }}"
+  - name: Creating the {{ git_repo_name }} repository
+    shell: |
+       curl -X POST -H "Accept: application/vnd.github+json"  -H "Authorization: Bearer {{token}}" https://api.github.com/user/repos -d '{"name":"{{ git_repo_name }}","description":"This is your first repository","homepage":"https://github.com","private":true}' | jq -r '.clone_url'
+    register: gitclone
 
+#  - name: Gathering repo name
+#    set_fact:
+#      git_repo_name: "{{ giturl.stdout | regex_search('[^//]+$') | regex_replace('.git', '') }}"
+      
   - name: Restoring the files from s3 to {{ git_repo_name }} repository
     shell: |
-       git clone {{git_clone}} && cd {{ git_repo_name }}
+       git clone {{gitclone.stdout}} && cd {{ git_repo_name }}
        aws s3 cp s3://{{s3bucket_name}}/{{ git_repo_name }}  . --recursive
        git add -A
        git config user.email "{{git_email}}"
-       git commit -m "{{git_msg}} {{ s3bucket_name }} s3 bucket"
+       git commit -m "{{ git_msg }} {{ s3bucket_name }} s3 bucket"
        git push origin
