@@ -31,7 +31,7 @@
       git clone {{git_repo_url}} 
       aws s3 cp {{git_repo_name}} s3://{{bucket}}/{{git_repo_name}} --exclude ".git/*" --recursive
       cd {{git_repo_name}} && git log --pretty="The author of %h was %an, %ar%nCommit message: %s%n" > {{git_repo_name}}_commit_log.txt
-      aws s3 cp {{git_repo_name}}_commit_log.txt s3://{{bucket}}/{{git_repo_name}} 
+      aws s3 cp {{git_repo_name}}_commit_log.txt s3://{{bucket}}/{{git_repo_name}}/{{git_repo_name}}_commit_log.txt
     args:
       chdir: /tmp
     when: gitrepo
@@ -44,7 +44,7 @@
       do
          aws s3 cp $filepush s3://{{bucket}}/$filepush
          git log --pretty="The author of %h was %an, %ar%nCommit message: %s%n" > {{git_repo_name}}_commit_log.txt
-         aws s3 cp {{git_repo_name}}_commit_log.txt s3://{{bucket}}/{{git_repo_name}}
+         aws s3 cp {{git_repo_name}}_commit_log.txt s3://{{bucket}}/{{git_repo_name}}/{{git_repo_name}}_commit_log.txt
       done
     when: latestfiles
   
