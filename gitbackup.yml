@@ -25,16 +25,16 @@
     set_fact:
       git_repo_name: "{{ git_repo_url | regex_search('[^//]+$') | regex_replace('.git', '') }}"
 
-  - name: Uploading all files from {{git_repo_name}} repo to {{bucket}} s3 bucket.
+  - name: Uploading all files from {{git_repo_name}} github repo to {{bucket}} s3 bucket.
     shell: |
       git config --global credential.helper cache
       git clone {{git_repo_url}} 
-      aws s3 cp {{git_repo_name}} s3://{{bucket}}/{{git_repo_name}} --recursive --exclude ".git"
+      aws s3 cp {{git_repo_name}} s3://{{bucket}}/{{git_repo_name}} --exclude ".git/*" --recursive
     args:
       chdir: /tmp
     when: gitrepo
  
-  - name: Uploading the latest updated files from {{git_repo_name}} repo to {{bucket}} s3 bucket, since a day.
+  - name: Uploading the latest updated or created files from {{git_repo_name}} github repo to {{bucket}} s3 bucket, since a day.
     shell: |
       git config --global credential.helper cache
       git clone {{git_repo_url}} && cd {{git_repo_name}}
