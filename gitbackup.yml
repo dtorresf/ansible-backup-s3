@@ -1,8 +1,11 @@
 ---
-- hosts: all
+- hosts: localhost
   become: yes
   vars:
     bucket: kmss3check
+    git_repo_url: "https://github.com/gody48/ansible-backup-s3.git"
+    latestfiles: false
+    gitrepo: true
   tasks:
 #  - name: Uploading the files to s3
 #    shell: |
@@ -18,16 +21,30 @@
 #      chdir: /tmp/
 #    register: filelist
 
-  - name: Uploading the latest updated files from the past 2 days to {{bucket}} s3 bucket
-    delegate_to: localhost
+  - name: Gathering repo name
+    set_fact:
+      git_repo_name: "{{ git_clone | regex_search('[^//]+$') | regex_replace('.git', '') }}"
+
+  - name: Uploading all files from {{git_repo_name}} repo to {{bucket}} s3 bucket.
     shell: |
       git config --global credential.helper cache
-      git clone https://github.com/gody48/ansible-backup-s3.git && cd ansible-backup-s3
-      for filepush in `git log --pretty=format: --name-only --since="2 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`
+      git clone {{git_repo_url}} 
+         aws s3 cp {{git_repo_name}} s3://{{bucket}}/{{git_repo_name}} --recursive
+      done
+    args:
+      chdir: /tmp
+    when: gitrepo
+ 
+  - name: Uploading the latest updated files from {{git_repo_name}} repo to {{bucket}} s3 bucket, since a day.
+    shell: |
+      git config --global credential.helper cache
+      git clone {{git_repo_url}} && cd {{git_repo_name}}
+      for filepush in `git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`
       do
          aws s3 cp $filepush s3://{{bucket}}/$filepush
       done
-      
+    when: latestfiles
+  
 #for filedelete in `git log --name-only --since="2 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | grep "    Delete " | awk '{print $2}'`
 #do
 #    aws s3api delete-object --bucket {{bucket}} --key $filedelete
