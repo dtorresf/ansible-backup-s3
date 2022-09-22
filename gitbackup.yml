@@ -29,7 +29,7 @@
     shell: |
       git config --global credential.helper cache
       git clone {{git_repo_url}} 
-      aws s3 cp {{git_repo_name}} s3://{{bucket}}/{{git_repo_name}} --recursive
+      aws s3 cp {{git_repo_name}} s3://{{bucket}}/{{git_repo_name}} --recursive --exclude ".git"
     args:
       chdir: /tmp
     when: gitrepo
