@@ -3,7 +3,7 @@
   become: yes
   vars:
     bucket: kmss3check
-    git_repo_url: "https://github.com/gody48/PageObjectModel.git"
+    git_repo_url: "https://github.com/gody48/serverless-automated-ui-testing.git,https://github.com/gody48/AWS-Trusted-Advisor-Tools.git"
     latestfiles: false
     gitrepo: true
   tasks:
@@ -23,15 +23,16 @@
 
   - name: Filtering out repo name
     set_fact:
-      git_repo_name: "{{ git_repo_url | regex_search('[^//]+$') | regex_replace('.git', '') }}"
-
-  - name: Uploading all files from {{git_repo_name}} github repo to {{bucket}} s3 bucket
+      git_repo_name: "{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}"
+    loop: "{{ git_repo_url.split(',') }}"
+    
+  - name: Uploading all files from github repo to {{bucket}} s3 bucket
     shell: |
       git config --global credential.helper cache
-      git clone {{git_repo_url}} 
-      aws s3 cp {{git_repo_name}} s3://{{bucket}}/{{git_repo_name}} --exclude ".git/*" --recursive
-      cd {{git_repo_name}} && git log --pretty="The author of %h was %an, %ar%nCommit message: %s%n" > {{git_repo_name}}_commit_log.txt
-      aws s3 cp {{git_repo_name}}_commit_log.txt s3://{{bucket}}/{{git_repo_name}}/{{git_repo_name}}_commit_log.txt
+      git clone {{item}} 
+      aws s3 cp {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} s3://{{bucket}}/{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} --exclude ".git/*" --recursive
+      rm -rf {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}      
+    loop: "{{ git_repo_url.split(',') }}" 
     args:
       chdir: /tmp
     when: gitrepo
@@ -39,13 +40,14 @@
   - name: Uploading the latest updated or created files from {{git_repo_name}} github repo to {{bucket}} s3 bucket, since a day
     shell: |
       git config --global credential.helper cache
-      git clone {{git_repo_url}} && cd {{git_repo_name}}
+      git clone {{item}} && cd {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}
       for filepush in `git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`
       do
          aws s3 cp $filepush s3://{{bucket}}/$filepush
          git log --pretty="The author of %h was %an, %ar%nCommit message: %s%n" > {{git_repo_name}}_commit_log.txt
-         aws s3 cp {{git_repo_name}}_commit_log.txt s3://{{bucket}}/{{git_repo_name}}/{{git_repo_name}}_commit_log.txt
+         aws s3 cp {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}_commit_log.txt s3://{{bucket}}/{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}/{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}_commit_log.txt
       done
+    loop: "{{ git_repo_url.split(',') }}"       
     when: latestfiles
   
 #for filedelete in `git log --name-only --since="2 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | grep "    Delete " | awk '{print $2}'`
