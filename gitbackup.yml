@@ -3,7 +3,7 @@
   become: yes
   vars:
     bucket: kmss3check
-    git_repo_url: "https://github.com/gody48/selenium-docker.git"
+    git_repo_url: "https://github.com/gody48/PageObjectModel.git"
     latestfiles: false
     gitrepo: true
   tasks:
