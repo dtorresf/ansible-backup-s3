@@ -30,6 +30,8 @@
       git config --global credential.helper cache
       git clone {{git_repo_url}} 
       aws s3 cp {{git_repo_name}} s3://{{bucket}}/{{git_repo_name}} --exclude ".git/*" --recursive
+      cd {{git_repo_name}} && git log --pretty="The author of %h was %an, %ar%nCommit message: %s%n" > {{git_repo_name}}_commit_log.txt
+      aws s3 cp {{git_repo_name}}_commit_log.txt s3://{{bucket}}/{{git_repo_name}} 
     args:
       chdir: /tmp
     when: gitrepo
@@ -41,6 +43,8 @@
       for filepush in `git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`
       do
          aws s3 cp $filepush s3://{{bucket}}/$filepush
+         git log --pretty="The author of %h was %an, %ar%nCommit message: %s%n" > {{git_repo_name}}_commit_log.txt
+         aws s3 cp {{git_repo_name}}_commit_log.txt s3://{{bucket}}/{{git_repo_name}}
       done
     when: latestfiles
   
