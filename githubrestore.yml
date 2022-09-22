@@ -17,7 +17,8 @@
   - name: Restoring the files from s3 to {{ git_repo_name }} repository
     shell: |
        git clone {{git_clone}} && cd {{ git_repo_name }}
-       aws s3 cp s3://{{s3bucket_name}}/{{ git_repo_name }} . --recursive
+       aws s3 cp s3://{{s3bucket_name}}/ansible-backup-s3  . --recursive
+#       aws s3 cp s3://{{s3bucket_name}}/{{ git_repo_name }} . --recursive
        git add -A
        git config user.email "{{git_email}}"
        git commit -m "{{git_msg}} {{ s3bucket_name }} s3 bucket"
