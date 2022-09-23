@@ -35,6 +35,8 @@
         done
       fi
     loop: "{{ (git_repo_list.stdout | from_json) | map(attribute='clone_url') | list }}"
+    args:
+      chdir: /tmp    
     when: gitlatestfiles
 
 #  - name: Listing out the repositories
