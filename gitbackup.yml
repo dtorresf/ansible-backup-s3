@@ -12,15 +12,6 @@
     shell: |
       curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer {{token}}" https://api.github.com/orgs/safestart/repos
     register: git_repo_list
-
-  - name: Listing out the repositories
-    debug: msg="{{ (git_repo_list.stdout | from_json) | map(attribute='clone_url') | join(',')  }}"
-    register: git_repo_url
-    
-#  - name: Filtering out repo name
-#    set_fact:
-#      git_repo_name: "{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}"
-#    loop: "{{ git_repo_url.split(',') }}"
     
   - name: Uploading all files from github repo to {{bucket}} s3 bucket
     shell: |
@@ -28,7 +19,7 @@
       git clone {{item}} 
       aws s3 cp {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} s3://{{bucket}}/{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} --exclude ".git/*" --recursive
       rm -rf {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}      
-    loop: "{{ git_repo_url.msg.split(',') }}" 
+    loop: "{{ (git_repo_list.stdout | from_json) | map(attribute='clone_url') | list }}"
     args:
       chdir: /tmp
     when: gitrepo
@@ -43,9 +34,18 @@
            aws s3 cp $filepush s3://{{bucket}}/$filepush
         done
       fi
-    loop: "{{ git_repo_url.split(',') }}"       
+    loop: "{{ (git_repo_list.stdout | from_json) | map(attribute='clone_url') | list }}"
     when: gitlatestfiles
-  
+
+#  - name: Listing out the repositories
+#    debug: msg="{{ (git_repo_list.stdout | from_json) | map(attribute='clone_url') | join(' , ')  }}"
+#    register: git_repo_url
+    
+#  - name: Filtering out repo name
+#    set_fact:
+#      git_repo_name: "{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}"
+#    loop: "{{ git_repo_url.split(',') }}"
+
 #for filedelete in `git log --name-only --since="2 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | grep "    Delete " | awk '{print $2}'`
 #do
 #         git log --pretty="The author of %h was %an, %ar%nCommit message: %s%n" > {{git_repo_name}}_commit_log.txt
