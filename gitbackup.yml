@@ -16,7 +16,7 @@
   - name: Uploading all files from github repo to {{bucket}} s3 bucket
     shell: |
       git config --global credential.helper cache
-      git clone {{item}} 
+      git clone https://{{token}}@{{item}} 
       aws s3 cp {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} s3://{{bucket}}/{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} --exclude ".git/*" --recursive
       rm -rf {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}      
     loop: "{{ (git_repo_list.stdout | from_json) | map(attribute='clone_url') | list }}"
@@ -27,7 +27,7 @@
   - name: Uploading the latest updated or created files from {{git_repo_name}} github repo to {{bucket}} s3 bucket, since a day
     shell: |
       git config --global credential.helper cache
-      git clone {{item}} && cd {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}
+      git clone https://{{token}}@{{item}} && cd {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}
       if [ $(git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | wc -l) -gt 0 ]; then 
         for filepush in `git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`
         do
