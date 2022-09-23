@@ -16,7 +16,7 @@
   - name: Uploading all files from github repo to {{bucket}} s3 bucket
     shell: |
       git config --global credential.helper cache
-      git clone https://{{token}}@{{item}} 
+      git clone https://{{ token }}@{{ item | regex_replace('https://', '') }} 
       aws s3 cp {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} s3://{{bucket}}/{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} --exclude ".git/*" --recursive
       rm -rf {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}      
     loop: "{{ (git_repo_list.stdout | from_json) | map(attribute='clone_url') | list }}"
