@@ -5,8 +5,8 @@
    - vault.yml
   vars:
     bucket: gitrepo-backup
-    gitrepo: true  
-    gitlatestfiles: false
+    gitrepo: false  
+    gitlatestfiles: true
   tasks:
   - name: Gathering all the repositories
     shell: |
