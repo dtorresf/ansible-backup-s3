@@ -11,7 +11,9 @@
   - name: Gathering all the repositories
     shell: |
       curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer {{token}}" https://api.github.com/orgs/safestart/repos
-    register: git_repo_list
+    args:
+       warn: false
+    register: git_repo_list       
     
   - name: Uploading all files from github repo to {{bucket}} s3 bucket
     shell: |
