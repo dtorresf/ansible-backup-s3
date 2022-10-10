@@ -4,7 +4,7 @@
   vars_files:
    - vault.yml
   vars:
-    bucket: kmss3check
+    bucket: gitrepo-backup
     gitrepo: true  
     gitlatestfiles: false
   tasks:
@@ -29,8 +29,7 @@
       git config --global credential.helper cache
       git clone https://{{token}}@{{item}} && cd {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}
       if [ $(git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | wc -l) -gt 0 ]; then 
-        for filepush in `git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`
-        do
+        for filepush in `git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`; do
            aws s3 cp $filepush s3://{{bucket}}/$filepush
         done
       fi
