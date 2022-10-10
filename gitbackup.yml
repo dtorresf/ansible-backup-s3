@@ -24,7 +24,7 @@
       chdir: /tmp
     when: gitrepo
  
-  - name: Uploading the latest updated or created files from {{git_repo_name}} github repo to {{bucket}} s3 bucket, since a day
+  - name: Uploading the latest updated or created files from github repo to {{bucket}} s3 bucket, since a day
     shell: |
       git config --global credential.helper cache
       git clone https://{{token}}@{{item}} && cd {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}
