@@ -51,7 +51,7 @@
           if [ $(cd {{ item }} && git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | wc -l) -ne 0 ]; then
              for filepush in `cd {{ item }} && git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`; do
                 if [[ -f "{{item}}/$filepush" ]]; then
-                   aws s3 cp {{item}}/$filepush s3://{{bucket}}/{{ item }}/$branch/$filepush --recursive
+                   aws s3 cp {{item}}/$filepush s3://{{bucket}}/{{ item }}/$branch/$filepush
                 fi
              done
           fi
@@ -69,7 +69,7 @@
       if [ $(cd {{ item }} && git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | wc -l) -ne 0 ]; then
            for filepush in `cd {{ item }} && git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`; do
               if [[ -f "{{item}}/$filepush" ]]; then
-                 aws s3 cp {{item}}/$filepush s3://{{bucket}}/{{ item }}/master/$filepush --recursive
+                 aws s3 cp {{item}}/$filepush s3://{{bucket}}/{{ item }}/master/$filepush
               fi
            done
       fi
