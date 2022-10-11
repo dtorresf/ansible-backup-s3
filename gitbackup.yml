@@ -8,7 +8,7 @@
   - name: Uploading all files from github repo to {{bucket}} s3 bucket according to environment branch
     shell: |
       git config --global credential.helper cache
-      repo_branch=$(echo "working_branch Development QA Production")
+      repo_branch=$(echo "working_branch Development QA Production production")
       for branch in $(echo $repo_branch | tr ' ' '\n') ; do
           git clone -b $branch https://{{ token }}@github.com/safestart/{{ item }}.git
           aws s3 cp {{ item }}/ s3://{{bucket}}/{{ item }}/$branch/ --exclude ".git/*" --recursive
@@ -45,7 +45,7 @@
   - name: Uploading the latest updated files from all environment branch to {{bucket}} s3 bucket, since a day.
     shell: |
       git config --global credential.helper cache
-      repo_branch=$(echo "working_branch Development QA Production")
+      repo_branch=$(echo "working_branch Development QA Production production")
       for branch in $(echo $repo_branch | tr ' ' '\n') ; do
           git clone -b $branch https://{{ token }}@github.com/safestart/{{ item }}.git
           if [ $(cd {{ item }} && git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | wc -l) -ne 0 ]; then
