@@ -3,56 +3,125 @@
   become: yes
   vars_files:
    - vault.yml
-  vars:
-    bucket: gitrepo-backup
-    gitrepo: false  
-    gitlatestfiles: true
+   - repolist.yml
   tasks:
-  - name: Gathering all the repositories
-    shell: |
-      curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer {{token}}" https://api.github.com/orgs/safestart/repos
-    args:
-       warn: false
-    register: git_repo_list       
-    
-  - name: Uploading all files from github repo to {{bucket}} s3 bucket
+  - name: Uploading all files from github repo to {{bucket}} s3 bucket according to environment branch
     shell: |
       git config --global credential.helper cache
-      git clone https://{{ token }}@{{ item | regex_replace('https://', '') }} 
-      aws s3 cp {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} s3://{{bucket}}/{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} --exclude ".git/*" --recursive
-      rm -rf {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}      
-    loop: "{{ (git_repo_list.stdout | from_json) | map(attribute='clone_url') | list }}"
+      repo_branch=$(echo "working_branch Development QA Production")
+      for branch in $(echo $repo_branch | tr ' ' '\n') ; do
+          git clone -b $branch https://{{ token }}@github.com/safestart/{{ item }}.git
+          aws s3 cp {{ item }}/ s3://{{bucket}}/{{ item }}/$branch/ --exclude ".git/*" --recursive
+          rm -rf {{ item }}
+      done
+    loop: "{{ envbranch.split(',') }}"
     args:
       chdir: /tmp
     when: gitrepo
- 
-  - name: Uploading the latest updated or created files from github repo to {{bucket}} s3 bucket, since a day
+
+  - name: Uploading all files from github master branch to {{bucket}} s3 bucket
     shell: |
       git config --global credential.helper cache
-      git clone https://{{token}}@{{item}} && cd {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}
-      if [ $(git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | wc -l) -gt 0 ]; then 
-        for filepush in `git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`; do
-           aws s3 cp $filepush s3://{{bucket}}/$filepush
-        done
-      fi
-    loop: "{{ (git_repo_list.stdout | from_json) | map(attribute='clone_url') | list }}"
+      git clone -b master https://{{ token }}@github.com/safestart/{{ item }}.git
+      aws s3 cp {{ item }}/ s3://{{bucket}}/{{ item }}/master/ --exclude ".git/*" --recursive
+      rm -rf {{ item }}
+    loop: "{{ masterbranch.split(',') }}"
     args:
-      chdir: /tmp    
-    when: gitlatestfiles
+      chdir: /tmp
+    when: gitrepo
 
-#  - name: Listing out the repositories
-#    debug: msg="{{ (git_repo_list.stdout | from_json) | map(attribute='clone_url') | join(' , ')  }}"
-#    register: git_repo_url
-    
-#  - name: Filtering out repo name
-#    set_fact:
-#      git_repo_name: "{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}"
-#    loop: "{{ git_repo_url.split(',') }}"
+  - name: Uploading all files from github main branch to {{bucket}} s3 bucket
+    shell: |
+      git config --global credential.helper cache
+      git clone -b main https://{{ token }}@github.com/safestart/{{ item }}.git
+      aws s3 cp {{ item }}/ s3://{{bucket}}/{{ item }}/main/ --exclude ".git/*" --recursive
+      rm -rf {{ item }}
+    loop: "{{ mainbranch.split(',') }}"
+    args:
+      chdir: /tmp
+    when: gitrepo
 
-#for filedelete in `git log --name-only --since="2 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | grep "    Delete " | awk '{print $2}'`
-#do
-#         git log --pretty="The author of %h was %an, %ar%nCommit message: %s%n" > {{git_repo_name}}_commit_log.txt
-#         aws s3 cp {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}_commit_log.txt s3://{{bucket}}/{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}/{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}_commit_log.txt
-#    aws s3api delete-object --bucket {{bucket}} --key $filedelete
-#done
 
+  - name: Uploading the latest updated files from all environment branch to {{bucket}} s3 bucket, since a day.
+    shell: |
+      git config --global credential.helper cache
+      repo_branch=$(echo "working_branch Development QA Production")
+      for branch in $(echo $repo_branch | tr ' ' '\n') ; do
+          git clone -b $branch https://{{ token }}@github.com/safestart/{{ item }}.git
+          if [ $(cd {{ item }} && git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | wc -l) -ne 0 ]; then
+             for filepush in `cd {{ item }} && git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`; do
+                if [[ -f "{{item}}/$filepush" ]]; then
+                   aws s3 cp {{item}}/$filepush s3://{{bucket}}/{{ item }}/$branch/$filepush --recursive
+                fi
+             done
+          fi
+          rm -rf {{ item }}
+      done
+    loop: "{{ envbranch.split(',') }}"
+    args:
+      chdir: /tmp
+    when: latestfiles
+
+  - name: Uploading the latest updated files from master branch repos to {{bucket}} s3 bucket, since a day.
+    shell: |
+      git config --global credential.helper cache
+      git clone -b master https://{{ token }}@github.com/safestart/{{ item }}.git
+      if [ $(cd {{ item }} && git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | wc -l) -ne 0 ]; then
+           for filepush in `cd {{ item }} && git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`; do
+              if [[ -f "{{item}}/$filepush" ]]; then
+                 aws s3 cp {{item}}/$filepush s3://{{bucket}}/{{ item }}/master/$filepush --recursive
+              fi
+           done
+      fi
+      rm -rf {{ item }}
+    loop: "{{ masterbranch.split(',') }}"
+    args:
+      chdir: /tmp
+    when: latestfiles
+
+  - name: Uploading the latest updated files from main branch repos to {{bucket}} s3 bucket, since a day.
+    shell: |
+      git config --global credential.helper cache
+      git clone -b main https://{{ token }}@github.com/safestart/{{ item }}.git
+      if [ $(cd {{ item }} && git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | wc -l) -ne 0 ]; then
+           for filepush in `cd {{ item }} && git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`; do
+              if [[ -f "{{item}}/$filepush" ]]; then
+                 aws s3 cp {{item}}/$filepush s3://{{bucket}}/{{ item }}/main/$filepush
+              fi
+           done
+      fi
+      rm -rf {{ item }}
+    loop: "{{ mainbranch.split(',') }}"
+    args:
+      chdir: /tmp
+    when: latestfiles
+
+
+
+#  - name: Gathering all the repositories
+#    shell: |
+#      curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer {{token}}" https://api.github.com/orgs/safestart/repos
+#    register: git_repo_list
+#
+#    
+#  - name: Uploading all files from github repo to {{bucket}} s3 bucket
+#    shell: |
+#      git config --global credential.helper cache
+#      git clone https://{{ token }}@{{ item }} 
+#      aws s3 cp {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} s3://{{bucket}}/{{ item | regex_search('[^//]+$') | regex_replace('.git', '') }} --exclude ".git/*" --recursive
+#      rm -rf {{ item | regex_search('[^//]+$') | regex_replace('.git', '') }}      
+#    loop: "{{ (git_repo_list.stdout | from_json) | map(attribute='clone_url') | list }}"
+#    args:
+#      chdir: /tmp
+#    when: gitrepo
+#
+#  - name: Uploading the latest updated files from {{git_repo_name}} repo to {{bucket}} s3 bucket, since a day.
+#    shell: |
+#      git config --global credential.helper cache
+#      git clone {{git_repo_url}} && cd {{git_repo_name}}
+#      if [ $(git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF' | wc -l) -ne 0 ]; then
+#         for filepush in `git log --pretty=format: --name-only --since="1 days ago" --until="1 seconds ago" | sort | uniq | awk 'NF'`; do
+#             aws s3 cp $filepush s3://{{bucket}}/$filepush
+#         done
+#      fi
+#    when: latestfiles

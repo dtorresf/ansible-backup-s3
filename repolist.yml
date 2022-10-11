@@ -1,0 +1,7 @@
+---
+bucket: gitrepo-backup
+gitrepo: true
+gitlatestfiles: false
+envbranch: SteeringCommitteeReact,CourseAndSiteInstallationToolReact,ssiapi,CourseEngineReact,CourseEngineAPIReact,CapsuleEngineAPI,CourseInstallationToolAPI,courseenginereact_new,CourseInstallationToolReact,CourseEngineApi-2.0,CourseContentCreatorToolApi,CourseContentCreatorToolReact,CapsuleEngineReact
+mainbranch: Translations,cloudformation-templates
+masterbranch: SQLScriptsFORQA,NoSQLScripts
