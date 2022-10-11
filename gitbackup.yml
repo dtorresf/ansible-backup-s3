@@ -60,7 +60,7 @@
     loop: "{{ envbranch.split(',') }}"
     args:
       chdir: /tmp
-    when: latestfiles
+    when: gitlatestfiles
 
   - name: Uploading the latest updated files from master branch repos to {{bucket}} s3 bucket, since a day.
     shell: |
@@ -77,7 +77,7 @@
     loop: "{{ masterbranch.split(',') }}"
     args:
       chdir: /tmp
-    when: latestfiles
+    when: gitlatestfiles
 
   - name: Uploading the latest updated files from main branch repos to {{bucket}} s3 bucket, since a day.
     shell: |
@@ -94,7 +94,7 @@
     loop: "{{ mainbranch.split(',') }}"
     args:
       chdir: /tmp
-    when: latestfiles
+    when: gitlatestfiles
 
 
 
