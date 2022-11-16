@@ -1,7 +1,7 @@
 ---
 bucket: godfreydummy   # specify the bucker name to store the backups
-gitrepo: false   # specify true if all the repos are needed to backup, else false 
-gitlatestfiles: true   # specify true to backup only the latest files from specified repos, else false 
-envbranch: SteeringCommitteeReact
+gitrepo: true   # specify true if all the repos are needed to backup, else false 
+gitlatestfiles: false   # specify true to backup only the latest files from specified repos, else false 
+envbranch: SteeringCommitteeReact,ssiapi
 mainbranch: Translations,cloudformation-templates   # specify the repo names to backup the main branch
 masterbranch: SQLScriptsFORQA,NoSQLScripts   # specify the repo names to backup the master branch
