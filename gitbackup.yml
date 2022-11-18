@@ -96,6 +96,10 @@
       chdir: /tmp
     when: gitlatestfiles
 
+  - name: set stats
+    set_stats:
+      data:
+        msg_body_1: "This was a test"
 
 
 #  - name: Gathering all the repositories
