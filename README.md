@@ -39,7 +39,7 @@ AWS credentials
 	aws_access_key: aws_access_key
 	aws_secret_key: aws_secret_key
 
-AWS access and secret key for account. This user must have read/write permissions for S3 service.
+AWS access and secret key for the account. This user must have read/write permissions for S3 service.
 
 Example Playbook
 ----------------
