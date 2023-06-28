@@ -61,4 +61,4 @@ Author Information
 Daniela Torres Faria
 danielatorres@danielatorres.me
 www.danielatorres.me
-Example commit from demo branch
+THis is an Example commit from demo branch
