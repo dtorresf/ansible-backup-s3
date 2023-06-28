@@ -6,7 +6,7 @@ backups3
 Requirements
 ------------
 
-You just need your ansible installation nothing more.
+You just need your ansible installation.
 
 Role Variables
 --------------
@@ -39,7 +39,7 @@ AWS credentials
 	aws_access_key: aws_access_key
 	aws_secret_key: aws_secret_key
 
-AWS access and secret key for account. This user must have read/write permissions for S3 service.
+AWS access and secret key for the account. This user must have read/write permissions for S3 service.
 
 Example Playbook
 ----------------
@@ -61,3 +61,4 @@ Author Information
 Daniela Torres Faria
 danielatorres@danielatorres.me
 www.danielatorres.me
+THis is an Example commit from demo branch

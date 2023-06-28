@@ -1,6 +1,6 @@
 galaxy_info:
-  author: Daniela Torres <danielatorres@danielatorres.me>
-  description: Ansible role to backup folders to tar.gz and copy them to amazon s3 bucket
+  author: Gody
+  description: Ansible role to backup folders and copy them to amazon s3 bucket
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
@@ -42,11 +42,6 @@ galaxy_info:
   #   - 1.0
   #   - 7
   #   - 99.99
-
-  platforms:
-    - name: Ubuntu
-      versions:
-         - all
 
   galaxy_tags:
     - s3
